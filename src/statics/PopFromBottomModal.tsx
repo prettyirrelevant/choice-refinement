@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import WalletConnect from "@walletconnect/client";
 import algowallet from "../assets/algorandwallet.svg";
 import myalgo from "../assets/myalgo.svg";
 import algosigner from "../assets/algosigner.svg";
@@ -16,7 +17,6 @@ import {
   setConnected,
   setWalletType,
 } from "../store/walletSlice";
-import WalletConnect from "@walletconnect/client";
 
 const chain = ChainType.TestNet;
 
