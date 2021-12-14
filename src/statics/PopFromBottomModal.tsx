@@ -7,6 +7,7 @@ import ScrollText from "../components/ScrollText";
 import {
   ChainType,
   getAccountAssets,
+  reset,
   selectAddress,
   selectConnected,
   selectConnector,
@@ -38,40 +39,38 @@ const PopFromBottomModal = () => {
     }
   };
 
-  const subscribeToEvents = useCallback(
-    (_walletConnector: WalletConnect) => {
-      if (!_walletConnector) {
-        return;
+  const subscribeToEvents = useCallback(() => {
+    const _walletConnector = walletConnector as WalletConnect;
+    if (!_walletConnector) {
+      return;
+    }
+    // Subscribe to connection events
+    _walletConnector.on("connect", (error, payload) => {
+      console.log("%cOn connect", "background: yellow");
+      if (error) {
+        throw error;
       }
-      // Subscribe to connection events
-      _walletConnector.on("connect", (error, payload) => {
-        console.log("%cOn connect", "background: yellow");
-        if (error) {
-          throw error;
-        }
-        const { accounts } = payload.params[0];
-        dispatch({ type: "accounts", payload: accounts });
-      });
+      const { accounts } = payload.params[0];
+      dispatch(setAccounts(accounts));
+    });
 
-      _walletConnector.on("session_update", (error, payload) => {
-        console.log("%cOn session_update", "background: yellow");
-        if (error) {
-          throw error;
-        }
-        const { accounts } = payload.params[0];
-        dispatch({ type: "accounts", payload: accounts });
-      });
+    _walletConnector.on("session_update", (error, payload) => {
+      console.log("%cOn session_update", "background: yellow");
+      if (error) {
+        throw error;
+      }
+      const { accounts } = payload.params[0];
+      dispatch(setAccounts(accounts));
+    });
 
-      _walletConnector.on("disconnect", (error, payload) => {
-        console.log("%cOn disconnect", "background: yellow");
-        if (error) {
-          throw error;
-        }
-        dispatch({ type: "reset" });
-      });
-    },
-    [dispatch]
-  );
+    _walletConnector.on("disconnect", (error, payload) => {
+      console.log("%cOn disconnect", "background: yellow");
+      if (error) {
+        throw error;
+      }
+      dispatch(reset());
+    });
+  }, [dispatch, walletConnector]);
 
   const setAccountsAtConnection = useCallback(
     (accounts: []) => {
@@ -100,7 +99,7 @@ const PopFromBottomModal = () => {
         return;
       }
       if (walletType === "walletConnect") {
-        subscribeToEvents(walletConnector);
+        subscribeToEvents();
         if (!walletConnector.connected) {
           walletConnector.createSession();
         }
