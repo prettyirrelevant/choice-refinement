@@ -2,7 +2,6 @@
   "name": "choice-voting-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://fionnachan.github.io/choice-refinement/",
   "dependencies": {
     "@json-rpc-tools/utils": "^1.7.6",
     "@loadable/component": "^5.15.0",

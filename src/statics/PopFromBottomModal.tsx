@@ -70,7 +70,7 @@ const PopFromBottomModal = () => {
         dispatch({ type: "reset" });
       });
     },
-    [walletConnector]
+    [dispatch]
   );
 
   const setAccountsAtConnection = useCallback(
