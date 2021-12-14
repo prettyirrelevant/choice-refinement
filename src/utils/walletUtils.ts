@@ -1,8 +1,6 @@
 import algosdk, { Transaction } from "algosdk";
 import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
 import { ChainType, clientForChain } from "./api";
-import { Dispatch } from "react";
-import WalletConnect from "@walletconnect/client";
 
 export interface SignedTxn {
   txID: string
@@ -97,36 +95,3 @@ async function waitForConfirmation(txId: string, timeout: number, chain: ChainTy
   /* eslint-enable no-await-in-loop */
   throw new Error(`Transaction not confirmed after ${timeout} rounds!`);
 }
-
-export const subscribeToEvents =
-  (dispatch: Dispatch<any>) => (walletConnector: WalletConnect) => {
-    if (!walletConnector) {
-      return;
-    }
-    // Subscribe to connection events
-    walletConnector.on("connect", (error, payload) => {
-      console.log("%cOn connect", "background: yellow");
-      if (error) {
-        throw error;
-      }
-      const { accounts } = payload.params[0];
-      dispatch({ type: "accounts", payload: accounts });
-    });
-
-    walletConnector.on("session_update", (error, payload) => {
-      console.log("%cOn session_update", "background: yellow");
-      if (error) {
-        throw error;
-      }
-      const { accounts } = payload.params[0];
-      dispatch({ type: "accounts", payload: accounts });
-    });
-
-    walletConnector.on("disconnect", (error, payload) => {
-      console.log("%cOn disconnect", "background: yellow");
-      if (error) {
-        throw error;
-      }
-      dispatch({ type: "reset" });
-    });
-  };

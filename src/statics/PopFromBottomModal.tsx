@@ -15,7 +15,7 @@ import {
   setConnected,
   setWalletType,
 } from "../store/walletSlice";
-import { subscribeToEvents } from "../utils/walletUtils";
+import WalletConnect from "@walletconnect/client";
 
 const chain = ChainType.TestNet;
 
@@ -37,6 +37,41 @@ const PopFromBottomModal = () => {
       connectWallet();
     }
   };
+
+  const subscribeToEvents = useCallback(
+    (_walletConnector: WalletConnect) => {
+      if (!_walletConnector) {
+        return;
+      }
+      // Subscribe to connection events
+      _walletConnector.on("connect", (error, payload) => {
+        console.log("%cOn connect", "background: yellow");
+        if (error) {
+          throw error;
+        }
+        const { accounts } = payload.params[0];
+        dispatch({ type: "accounts", payload: accounts });
+      });
+
+      _walletConnector.on("session_update", (error, payload) => {
+        console.log("%cOn session_update", "background: yellow");
+        if (error) {
+          throw error;
+        }
+        const { accounts } = payload.params[0];
+        dispatch({ type: "accounts", payload: accounts });
+      });
+
+      _walletConnector.on("disconnect", (error, payload) => {
+        console.log("%cOn disconnect", "background: yellow");
+        if (error) {
+          throw error;
+        }
+        dispatch({ type: "reset" });
+      });
+    },
+    [walletConnector]
+  );
 
   const setAccountsAtConnection = useCallback(
     (accounts: []) => {
@@ -65,7 +100,7 @@ const PopFromBottomModal = () => {
         return;
       }
       if (walletType === "walletConnect") {
-        subscribeToEvents(dispatch)(walletConnector);
+        subscribeToEvents(walletConnector);
         if (!walletConnector.connected) {
           walletConnector.createSession();
         }
@@ -99,6 +134,7 @@ const PopFromBottomModal = () => {
     address,
     connected,
     dispatch,
+    subscribeToEvents,
     setAccountsAtConnection,
     setAlgoSignerAccounts,
     walletType,
